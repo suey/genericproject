@@ -23,6 +23,7 @@ public abstract class AbstractScreen implements Screen {
         this.font = new BitmapFont();
         this.batch = new SpriteBatch();
         this.stage = new Stage(0, 0, true);
+        Gdx.input.setInputProcessor(stage);
     }
 
     protected String getName() {

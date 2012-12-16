@@ -19,12 +19,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.utils.Json;
 
 import ema.knotomania.Knotomania;
 import ema.knotomania.graph.Graph;
 import ema.knotomania.graph.Node;
 
-public abstract class AbstractLevel implements Screen {
+public class Level implements Screen {
 	private Knotomania game;
 	private OrthographicCamera camera;
 	private SpriteBatch batch;
@@ -32,6 +33,8 @@ public abstract class AbstractLevel implements Screen {
 	Mode mode = Mode.Normal;
 	static int TOUCH_RADIUS = 60;
 	
+	int lvlID;
+	boolean isCustom;
 	Graph g;
 	Node nearest = null;
 	int moves = 0;
@@ -39,16 +42,21 @@ public abstract class AbstractLevel implements Screen {
 	Stage ui;
     Dialog successDialog;	
 	
-	public abstract void constructGraph();
-	public abstract int getGoldMoveCount();
-	public abstract int getSilverMoveCount();
-	public abstract int getBronzeMoveCount();
+	public void constructGraph() {
+		Json json = new Json();
+		if(isCustom) {
+			g = json.fromJson(Graph.class, Gdx.files.local("customLevel/level" + lvlID + ".json"));
+		} else {
+			g = json.fromJson(Graph.class, Gdx.files.internal("levels/level" + lvlID + ".json"));
+		}
+	}
 	
-	public AbstractLevel(Knotomania game) {
+	public Level(Knotomania game, int lvlID, boolean isCustom) {
 		this.game = game;
         ui = new Stage(0, 0, true);
         ui.setViewport(800, 480, true);
-        
+        this.lvlID = lvlID;
+        this.isCustom = isCustom;
 	}
 	
 	@Override
@@ -133,7 +141,7 @@ public abstract class AbstractLevel implements Screen {
 	        Label l = new Label("You needed " + moves + " moves!", skin);
 	        successDialog.add(l);
 	        successDialog.setOrigin(100, 0);
-	        TextButton button = new TextButton("Button 1", skin);
+	        //TextButton button = new TextButton("Button 1", skin);
 	        table.add(successDialog);
 	        mode = Mode.Exit;
 	        

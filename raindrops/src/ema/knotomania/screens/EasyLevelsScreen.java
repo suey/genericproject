@@ -1,7 +1,17 @@
 package ema.knotomania.screens;
 
-import static com.badlogic.gdx.math.Interpolation.*;
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
+import static com.badlogic.gdx.math.Interpolation.linear;
+import static com.badlogic.gdx.math.Interpolation.pow2;
+import static com.badlogic.gdx.math.Interpolation.pow2In;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.delay;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeIn;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeOut;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.forever;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.parallel;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.rotateTo;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.run;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.scaleBy;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -10,8 +20,7 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 import ema.knotomania.Knotomania;
-import ema.knotomania.screens.levels.Level01;
-import ema.knotomania.screens.levels.Level02;
+import ema.knotomania.screens.levels.Level;
 
 public class EasyLevelsScreen extends AbstractScreen {
     private Texture texture;
@@ -37,9 +46,9 @@ public class EasyLevelsScreen extends AbstractScreen {
 	        image.addAction(sequence(parallel(scaleBy(5f, 5f, 0.3f, pow2In), fadeOut(0.3f)), run(new Runnable() {
 				public void run() {
 				    if (x <= 400)	
-						game.setScreen(new Level01(game));
+						game.setScreen(new Level(game, 1, true));
 				    else
-				    	game.setScreen(new Level02(game));
+				    	game.setScreen(new Level(game, 2, true));
 				}
 	        })));
 	        wasTouched = true;

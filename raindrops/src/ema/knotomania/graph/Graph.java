@@ -10,20 +10,57 @@ public class Graph {
 	Array<Edge> edges;
 	Array<Intersection> intersections = new Array<Intersection>();
 	
-	ShapeRenderer sr = new ShapeRenderer();
+	int goldMoveCount;
+	int silverMoveCount;
+	int bronzeMoveCount;
+	
+	public Graph() {
+		this.nodes = new Array<Node>();
+		this.edges = new Array<Edge>();
+	}
 	
 	public Graph(Array<Node> nodes, Array<Edge> edges) {
 		this.nodes = nodes;
 		this.edges = edges;
 	}
 	
+	public int getGoldMoveCount() {
+		return goldMoveCount;
+	}
+
+	public int getSilverMoveCount() {
+		return silverMoveCount;
+	}
+
+	public int getBronzeMoveCount() {
+		return bronzeMoveCount;
+	}
+	
+	public void setGoldMoveCount(int gold) {
+		this.goldMoveCount = gold;
+	}
+	
+	public void setSilverMoveCount(int silver) {
+		this.silverMoveCount = silver;
+	}
+	
+	public void setBronzeMoveCount(int bronze) {
+		this.bronzeMoveCount = bronze;
+	}
+	
+	public boolean isValidGraph() {
+		// TODO do planarity tests here!
+		return nodes.size > 1 && edges.size > 1;
+	}
+	
 	public void draw(Camera camera) {
+		 ShapeRenderer sr = new ShapeRenderer();
 		 sr.setProjectionMatrix(camera.combined);
 		 
 		 sr.begin(ShapeType.Line);
 		 sr.setColor(0.4f, 0.6f, 0, 1);
 		 for (Edge e : edges) {
-			 sr.line(e.n1.x, e.n1.y, e.n2.x, e.n2.y);
+			 sr.line(nodes.get(e.n1).x, nodes.get(e.n1).y, nodes.get(e.n2).x, nodes.get(e.n2).y);
 		 }
 		 sr.end();
 		 
@@ -37,6 +74,25 @@ public class Graph {
 			 sr.filledCircle(i.x, i.y, 4);
 		 }
 		 sr.end();
+	}
+	
+	public void addNode(Node node) {
+		nodes.add(node);
+	}
+	
+	public void addEdge(Node n1, Node n2) {
+		//you have to make sure that the two nodes are present in the graph!
+		Edge edge;
+		int ind1 = -1, ind2 = -1;
+		for(int i = 0; i < nodes.size; i++) {
+			if(nodes.get(i).equals(n1)) {
+				ind1 = i;
+			} else if(nodes.get(i).equals(n2)) {
+				ind2 = i;
+			}
+		}
+		edge = new Edge(ind1, ind2);
+		edges.add(edge);
 	}
 	
 	// return the closest node to the center (x,y) of the circle with radius maxRadius,
@@ -83,10 +139,10 @@ public class Graph {
 	// http://mathworld.wolfram.com/Line-LineIntersection.html
 	// return intersection point or null if none
 	private Intersection getIntersection(Edge e1, Edge e2) {
-		double x1 = e1.n1.x, y1 = e1.n1.y,
-	           x2 = e1.n2.x, y2 = e1.n2.y,
-		       x3 = e2.n1.x, y3 = e2.n1.y,
-		       x4 = e2.n2.x, y4 = e2.n2.y;
+		double x1 = nodes.get(e1.n1).x, y1 = nodes.get(e1.n1).y,
+	           x2 = nodes.get(e1.n2).x, y2 = nodes.get(e1.n2).y,
+		       x3 = nodes.get(e2.n1).x, y3 = nodes.get(e2.n1).y,
+		       x4 = nodes.get(e2.n2).x, y4 = nodes.get(e2.n2).y;
 		
 		if (!linesIntersect(x1, y1, x2, y2, x3, y3, x4, y4)) {
 			return null;
@@ -175,6 +231,10 @@ public class Graph {
 class Intersection {
 	public int x;
 	public int y;
+	
+	public Intersection() {
+		//This constructor is essential for deserialization!
+	}
 	
 	public Intersection(int x, int y) {
 		this.x = x;

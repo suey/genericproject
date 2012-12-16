@@ -2,10 +2,14 @@ package ema.knotomania.graph;
 
 
 public class Edge {
-	public Node n1;
-	public Node n2;
+	public int n1;
+	public int n2;
 	
-	public Edge(Node n1, Node n2) {
+	public Edge() {
+		//This constructor is essential for deserialization!
+	}
+	
+	public Edge(int n1, int n2) {
 		this.n1 = n1;
 		this.n2 = n2;
 	}
