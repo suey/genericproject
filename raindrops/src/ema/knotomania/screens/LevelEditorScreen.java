@@ -28,6 +28,7 @@ public class LevelEditorScreen extends AbstractScreen {
 	
 	private int lastTouchedX;
 	private int lastTouchedY;
+	private int lastTempIndex;
 	
 	private Graph graph;
 	private Node startNode = null;
@@ -37,6 +38,7 @@ public class LevelEditorScreen extends AbstractScreen {
 	private ShapeRenderer shapeRenderer;
 	private Skin skin;
 	private Button saveButton;
+	private Button undoButton;
 	private Window dialogWindow;
 	private TextField goldTries;
 	private TextField silverTries;
@@ -46,6 +48,7 @@ public class LevelEditorScreen extends AbstractScreen {
 	
 	public LevelEditorScreen(Knotomania game) {
 		super(game);
+		lastTempIndex = 0;
 		shapeRenderer = new ShapeRenderer();
 		skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
 	    saveButton = new TextButton("Speichern", skin);
@@ -58,6 +61,14 @@ public class LevelEditorScreen extends AbstractScreen {
 					drawMode = false;
 				}
 			}});
+	    undoButton = new TextButton("Undo", skin);
+	    undoButton.setPosition(saveButton.getX()-undoButton.getWidth(),0);
+	    undoButton.addListener(new ChangeListener() {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				tempLoad();
+			}});
+	    stage.addActor(undoButton);
 	    stage.addActor(saveButton);
 	    
 	    dialogWindow = new Window("Medaillen", skin);
@@ -95,7 +106,7 @@ public class LevelEditorScreen extends AbstractScreen {
 		dialogWindow.add(dialogOkButton);
 		dialogWindow.add(dialogCancelButton);
 		dialogWindow.setPosition(400 - dialogWindow.getWidth()/2, 240 - dialogWindow.getHeight()/2);
-	    
+		
 		graph = new Graph();
 	}
 	
@@ -116,7 +127,7 @@ public class LevelEditorScreen extends AbstractScreen {
 			lastTouchedX = x;
 			lastTouchedY = y;
 			
-			if(collides(saveButton, touchPos)) {
+			if(collides(saveButton, touchPos) || collides(undoButton, touchPos)) {
 				graph.computeIntersections();
 				graph.draw(camera);
 				//TODO add saving stuff here
@@ -130,6 +141,7 @@ public class LevelEditorScreen extends AbstractScreen {
 				if(!isDragging) {
 					Node n = new Node(x, y);
 					graph.addNode(n);
+					tempSave();
 				}
 			} else {
 				shapeRenderer.setProjectionMatrix(camera.combined);
@@ -146,6 +158,7 @@ public class LevelEditorScreen extends AbstractScreen {
 				graph.addEdge(startNode, destNode);
 				startNode = null;
 				destNode = null;
+				tempSave();
 			}
 		}
 		
@@ -175,6 +188,31 @@ public class LevelEditorScreen extends AbstractScreen {
     	json.toJson(graph, Gdx.files.local("customLevel/level"+ nextLevelIndex +".json"));
     	System.out.println("Level " + nextLevelIndex + " saved!");
     	graph = new Graph();
+    	for(int i = 1; i <= lastTempIndex; i++) {
+    		Gdx.files.local("temp/save" + i + ".json").delete();
+    	}
+    	lastTempIndex = 0;
+    }
+    
+    private void tempSave() {
+    	lastTempIndex = Gdx.files.local("temp/").list().length + 1;
+    	Json json = new Json();
+    	json.toJson(graph, Gdx.files.local("temp/save"+ lastTempIndex +".json"));
+    	System.out.println("saving..." + lastTempIndex);
+    }
+    
+    private void tempLoad() {
+    	if(lastTempIndex > 0) {
+	    	Json json = new Json();
+	    	graph = json.fromJson(Graph.class, Gdx.files.local("temp/save" + lastTempIndex + ".json"));
+	    	Gdx.files.local("temp/save" + lastTempIndex + ".json").delete();
+	    	lastTempIndex--;
+    	} else {
+    		graph = new Graph();
+    		lastTempIndex = 0;
+    	}
+    	graph.computeIntersections();
+    	graph.draw(camera);
     }
 
 }
